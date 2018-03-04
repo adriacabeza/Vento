@@ -2,15 +2,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/tv_title"
-            android:hint="Name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:maxLines="1"
-            style="@style/Base.TextAppearance.AppCompat.Title"
-            android:layout_margin="16dp"/>
+
+    <TextView
+        android:id="@+id/tv_title"
+        style="@style/Base.TextAppearance.AppCompat.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/numberofparticipants"
+        android:layout_alignBottom="@+id/numberofparticipants"
+        android:layout_alignStart="@+id/ll1"
+        android:hint="Name"
+        android:inputType="text"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/numberofparticipants"
+        style="@style/Base.TextAppearance.AppCompat.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/ll1"
+        android:layout_marginStart="298dp"
+        android:layout_marginTop="20dp"
+        android:hint="0"
+        android:maxLines="1" />
+
 
     <ImageView
         android:layout_width="match_parent"
