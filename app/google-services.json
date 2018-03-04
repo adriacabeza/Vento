@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "746916949148",
+    "firebase_url": "https://ventos-f7134.firebaseio.com",
+    "project_id": "ventos-f7134",
+    "storage_bucket": "ventos-f7134.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746916949148:android:db88b5f26a1f611d",
+        "android_client_info": {
+          "package_name": "com.lordsantanna.vento"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "746916949148-dpm1md5gi3l72d36c0gi66lt9dhrgi9j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lordsantanna.vento",
+            "certificate_hash": "220671e44758c849637a75f34255db7db66b0293"
+          }
+        },
+        {
+          "client_id": "746916949148-7ftp107h8a0jeipeab7q8nsm7kbl8qk3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAs5h7XEV7BERo99j1jHpDVPU5XxKMDpk0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "746916949148-7ftp107h8a0jeipeab7q8nsm7kbl8qk3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
