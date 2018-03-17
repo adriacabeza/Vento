@@ -15,6 +15,7 @@ public class event {
     public long data;
     public double lat;
     public double lng;
+
     //TODO: amics
 
 

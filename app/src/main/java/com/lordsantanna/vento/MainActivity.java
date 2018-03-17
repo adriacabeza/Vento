@@ -41,9 +41,13 @@ import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.OnTabSelectListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 /**
  * public class MainActivity extends AppCompatActivity {
@@ -98,8 +102,11 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         Mapbox.getInstance(this, "pk.eyJ1IjoiY2FybG9zYWlyIiwiYSI6ImNpeGV1dnBwcDAwMnEyenNid3FtcjVnb24ifQ.muuRu5nSACwjkaCMU2Id6g");
         setContentView(R.layout.activity_main);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -220,8 +227,18 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
             }
 
         });
-
-
+        BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(int tabId) {
+                if(tabId == R.id.bbn_item1){}
+                else if(tabId == R.id.bbn_item2){}
+                else{
+                        Intent intent2 = new Intent(MainActivity.this,userwin.class);
+                       startActivity(intent2);
+                }
+            }
+        });
     }
 
     @SuppressWarnings( {"MissingPermission"})

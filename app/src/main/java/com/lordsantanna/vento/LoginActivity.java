@@ -69,6 +69,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
+                finish();
             } else {
                 Log.e(TAG,"Error on Google Sign In");
             }
@@ -96,8 +97,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         } else {
                             // If sign in fails, display a message to the user.
                             task.getException().printStackTrace();
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LoginActivity.this,
+                                    "Login unsuccessful: " + task.getException().getMessage(), //ADD THIS
                                     Toast.LENGTH_SHORT).show();
+
+
                         }
 
                         // ...

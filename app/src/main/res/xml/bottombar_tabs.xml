@@ -1,0 +1,16 @@
+<tabs>
+    <tab
+        id="@+id/bbn_item1"
+        color="@color/colorPrimary"
+        icon="@drawable/ic_map_black_24dp"
+        title="Mapa" />
+    <tab
+        id="@+id/bbn_item2"
+        icon="@drawable/ic_notifications_black_24dp"
+        title="Eventos" />
+    <tab
+        id="@+id/bbn_item3"
+        icon="@drawable/ic_person_black_24dp"
+        title="Perfil" />
+
+</tabs>
