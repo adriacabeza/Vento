@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -16,9 +17,11 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.lordsantanna.vento.utils.DatePickerFragment;
+import com.lordsantanna.vento.utils.MapUtils;
 import com.lordsantanna.vento.utils.TimePickerFragment;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -83,7 +86,7 @@ public class CrearEvento extends AppCompatActivity {
             }
         });
 
-        Glide.with(this).load(staticMapURL(position)).centerCrop().into(iv_map);
+        Glide.with(this).load(MapUtils.staticMapURL(position, 14, this)).centerCrop().into(iv_map);
 
     }
 
@@ -91,11 +94,15 @@ public class CrearEvento extends AppCompatActivity {
         DatePickerFragment newFragment = DatePickerFragment.newInstance(new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                // +1 because january is zero
-                date.set(year, month, day);
+                date.set(Calendar.YEAR, year);
+                date.set(Calendar.MONTH, month);
+                date.set(Calendar.DAY_OF_MONTH, day);
+                SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
+                String strDt = simpleDate.format(date.getTime());
+                tv_date.setText(strDt);
 
-                final String selectedDate = day + " / " + (month+1) + " / " + year;
-                tv_date.setText(selectedDate);
+                if(TextUtils.isEmpty(time.getText().toString())) showTimePickerDialog();
+
             }
         });
         newFragment.show(CrearEvento.this.getSupportFragmentManager(), "datePicker");
@@ -107,18 +114,14 @@ public class CrearEvento extends AppCompatActivity {
             public void onTimeSet(TimePicker timePicker, int h, int m) {
                 date.set(Calendar.HOUR_OF_DAY, h);
                 date.set(Calendar.MINUTE, m);
-                final String selectedTime = h+":"+m;
-                time.setText(selectedTime);
+                SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
+                String strTm = simpletime.format(date.getTime());
+                time.setText(strTm);
             }
 
         });
         newFragment.show(CrearEvento.this.getSupportFragmentManager(), "timePicker");
     }
-
-    public String staticMapURL(LatLng latLng){
-        return "https://api.mapbox.com/styles/v1/mapbox/dark-v9/static/"+latLng.getLongitude()+","+latLng.getLatitude()+",10.0,0,0/400x300@2x?access_token=pk.eyJ1IjoiY2FybG9zYWlyIiwiYSI6ImNpeGV1dnBwcDAwMnEyenNid3FtcjVnb24ifQ.muuRu5nSACwjkaCMU2Id6g";
-    }
-
 
 }
 

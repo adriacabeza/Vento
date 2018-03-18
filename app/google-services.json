@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "746916949148-0osjtn5hqoal357d2lki34k1tll6b1qg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lordsantanna.vento",
+            "certificate_hash": "17ef32113f24d386505adb384df190d27a690fd3"
+          }
+        },
+        {
+          "client_id": "746916949148-uu24e0vruvtettctf7nfjom2vhd0mq13.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lordsantanna.vento",
+            "certificate_hash": "2edcf65e936d1abe57a62010b38a15bc1c80ed77"
+          }
+        },
+        {
           "client_id": "746916949148-dpm1md5gi3l72d36c0gi66lt9dhrgi9j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

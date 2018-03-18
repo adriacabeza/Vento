@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.util.EventLog;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -18,12 +20,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.lordsantanna.vento.utils.MapUtils;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class EventoActivity extends AppCompatActivity {
@@ -42,6 +46,7 @@ public class EventoActivity extends AppCompatActivity {
         final TextView description = findViewById(R.id.tv_description);
         final Button button = findViewById(R.id.bt_action);
         final TextView participantes = findViewById(R.id.numberofparticipants);
+        final ImageView iv_map = findViewById(R.id.iv_map);
 
         final String key = getIntent().getStringExtra("key");
         eventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -49,14 +54,18 @@ public class EventoActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 name.setText(dataSnapshot.child(key).child("titol").getValue().toString());
                 description.setText(dataSnapshot.child(key).child("info").getValue().toString());
-                Date date = new Date((Long) dataSnapshot.child(key).child("data").getValue()*1000);
+                Calendar date = Calendar.getInstance();
+                date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
                 SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
-                String strDt = simpleDate.format(date);
+                String strDt = simpleDate.format(date.getTime());
                 dates.setText(strDt);
-                SimpleDateFormat simpletime =  new SimpleDateFormat("hh:mm");
-                String strTm = simpletime.format(date);
+                SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
+                String strTm = simpletime.format(date.getTime());
                 time.setText(strTm);
                 participantes.setText(String.valueOf((int) dataSnapshot.child(key).child("joined").getChildrenCount()));
+
+                LatLng position = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
+                Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(position, 14, EventoActivity.this)).centerCrop().into(iv_map);
             }
 
             @Override

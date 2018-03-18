@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Vento</string>
+    <string name="mapbox_key">pk.eyJ1IjoiY2FybG9zYWlyIiwiYSI6ImNpeGV1dnBwcDAwMnEyenNid3FtcjVnb24ifQ.muuRu5nSACwjkaCMU2Id6g</string>
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="user_location_permission_not_granted" />
+
 </resources>
