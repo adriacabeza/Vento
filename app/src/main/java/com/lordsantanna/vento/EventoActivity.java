@@ -33,18 +33,20 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class EventoActivity extends AppCompatActivity {
-    private FirebaseUser user;
+    private FirebaseUser FBuser;
     LatLng location;
-    String name;
+    String name, user;
+    int nparticiapants;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evento);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference eventsRef = database.getReference("event");
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        FBuser = FirebaseAuth.getInstance().getCurrentUser();
 
         final TextView tv_name = findViewById(R.id.tv_title);
+        final TextView tv_user = findViewById(R.id.tv_user);
         final TextView dates = findViewById(R.id.tv_date);
         final TextView time = findViewById(R.id.tv_time);
         final TextView description = findViewById(R.id.tv_description);
@@ -58,6 +60,8 @@ public class EventoActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 name = dataSnapshot.child(key).child("titol").getValue().toString();
                 tv_name.setText(name);
+                user = dataSnapshot.child(key).child("usuari").getValue().toString();
+                tv_user.setText(user);
                 description.setText(dataSnapshot.child(key).child("info").getValue().toString());
                 Calendar date = Calendar.getInstance();
                 date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
@@ -67,7 +71,8 @@ public class EventoActivity extends AppCompatActivity {
                 SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
                 String strTm = simpletime.format(date.getTime());
                 time.setText(strTm);
-                participantes.setText(String.valueOf((int) dataSnapshot.child(key).child("joined").getChildrenCount()));
+                nparticiapants = (int) dataSnapshot.child(key).child("joined").getChildrenCount();
+                participantes.setText(String.valueOf(nparticiapants)+" joined");
                 location = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
                 Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(location, 14, EventoActivity.this)).centerCrop().into(iv_map);
             }
@@ -87,9 +92,9 @@ public class EventoActivity extends AppCompatActivity {
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                String prova = FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(user.getDisplayName().toString()).getKey();
+                                String prova = FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(FBuser.getDisplayName().toString()).getKey();
                                // if(prova == null) {
-                                    FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(user.getDisplayName().toString()).setValue("1");
+                                    FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(FBuser.getDisplayName().toString()).setValue("1");
 
                                     Toast.makeText(EventoActivity.this, "Congratulations! You've joined this event.", Toast.LENGTH_SHORT).show();
                                     finish();
