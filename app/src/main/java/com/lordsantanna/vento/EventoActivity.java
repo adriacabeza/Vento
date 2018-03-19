@@ -1,6 +1,8 @@
 package com.lordsantanna.vento;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +34,8 @@ import java.util.Date;
 
 public class EventoActivity extends AppCompatActivity {
     private FirebaseUser user;
+    LatLng location;
+    String name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +44,7 @@ public class EventoActivity extends AppCompatActivity {
         final DatabaseReference eventsRef = database.getReference("event");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        final TextView name = findViewById(R.id.tv_title);
+        final TextView tv_name = findViewById(R.id.tv_title);
         final TextView dates = findViewById(R.id.tv_date);
         final TextView time = findViewById(R.id.tv_time);
         final TextView description = findViewById(R.id.tv_description);
@@ -52,7 +56,8 @@ public class EventoActivity extends AppCompatActivity {
         eventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                name.setText(dataSnapshot.child(key).child("titol").getValue().toString());
+                name = dataSnapshot.child(key).child("titol").getValue().toString();
+                tv_name.setText(name);
                 description.setText(dataSnapshot.child(key).child("info").getValue().toString());
                 Calendar date = Calendar.getInstance();
                 date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
@@ -63,9 +68,8 @@ public class EventoActivity extends AppCompatActivity {
                 String strTm = simpletime.format(date.getTime());
                 time.setText(strTm);
                 participantes.setText(String.valueOf((int) dataSnapshot.child(key).child("joined").getChildrenCount()));
-
-                LatLng position = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
-                Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(position, 14, EventoActivity.this)).centerCrop().into(iv_map);
+                location = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
+                Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(location, 14, EventoActivity.this)).centerCrop().into(iv_map);
             }
 
             @Override
@@ -109,6 +113,19 @@ public class EventoActivity extends AppCompatActivity {
             }
         });
 
+        iv_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(location!=null){
+                    Uri gmmIntentUri = Uri.parse("geo:"+location.getLatitude()+","+location.getLongitude()+"?q="+location.getLatitude()+","+location.getLongitude()+"("+Uri.encode(name)+")");
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(mapIntent);
+                    }
+                }
+            }
+        });
 
     }
 }

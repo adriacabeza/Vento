@@ -34,7 +34,8 @@
         android:id="@+id/iv_map"
         android:background="#EEE"
         android:layout_margin="8dp"
-        android:layout_below="@+id/tv_title"/>
+        android:layout_below="@+id/tv_title"
+        style="@style/ClickRippleDark"/>
 
     <LinearLayout
         android:layout_width="match_parent"
