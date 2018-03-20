@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
         super.onCreate(savedInstanceState);
 
 
-        Mapbox.getInstance(this, "pk.eyJ1IjoiY2FybG9zYWlyIiwiYSI6ImNpeGV1dnBwcDAwMnEyenNid3FtcjVnb24ifQ.muuRu5nSACwjkaCMU2Id6g");
+        Mapbox.getInstance(this, getResources().getString(R.string.mapbox_key));
         setContentView(R.layout.activity_main);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -147,8 +147,8 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 MainActivity.this.mapboxMap = mapboxMap;
+                mapboxMap.getUiSettings().setTiltGesturesEnabled(false);
                 enableLocationPlugin();
-
 
                 mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
                     @Override
