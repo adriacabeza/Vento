@@ -38,6 +38,7 @@ public class MapPickActivity extends AppCompatActivity {
     LatLng location;
     ImageView hoveringMarker;
     Button bt_pick;
+    Double initialZoom;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +54,7 @@ public class MapPickActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
 
         location = (LatLng) getIntent().getParcelableExtra("location");
+        initialZoom = getIntent().getDoubleExtra("zoom", 16.0);
 
         String title = getIntent().getStringExtra("title");
         if(title.isEmpty()) setTitle("Vento Event");
@@ -72,8 +74,7 @@ public class MapPickActivity extends AppCompatActivity {
                 mapboxMap.getUiSettings().setLogoMargins(mapboxMap.getUiSettings().getLogoMarginLeft()+bt_pick_LeftMargin,mapboxMap.getUiSettings().getLogoMarginTop(),mapboxMap.getUiSettings().getLogoMarginRight(), mapboxMap.getUiSettings().getLogoMarginBottom()+bt_pick_Height);
                 mapboxMap.getUiSettings().setCompassMargins(mapboxMap.getUiSettings().getCompassMarginLeft(),mapboxMap.getUiSettings().getCompassMarginTop() + ab_height,mapboxMap.getUiSettings().getCompassMarginRight(), mapboxMap.getUiSettings().getCompassMarginBottom()+bt_pick_Height);
                 mapboxMap.setPadding(0,0,0, 0);
-
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
+                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, initialZoom));
             }
          });
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -45,7 +46,7 @@ public class CrearEvento extends AppCompatActivity {
     Calendar date;
     LatLng location;
     String key;
-    boolean isCreating;
+    boolean isCreating = true, toLocationPicker = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,10 +62,17 @@ public class CrearEvento extends AppCompatActivity {
         isCreating = !(getIntent().hasExtra("key"));
         if(isCreating){
             location = (LatLng) getIntent().getParcelableExtra("location");
-            if(location == null){ //TODO: position null
-                location.setLatitude(41.40099);
-                location.setLongitude( 2.19876);
+            if(location == null) location = new LatLng(41.40099, 2.19876); //TODO: fail case location
+
+            toLocationPicker = getIntent().hasExtra("pickLocationFirstZoom");
+            if(toLocationPicker){
+                Intent intent = new Intent(CrearEvento.this, MapPickActivity.class);
+                intent.putExtra("location", location);
+                intent.putExtra("zoom", getIntent().getDoubleExtra("pickLocationFirstZoom", 16));
+                intent.putExtra("title", "New Event");
+                startActivityForResult(intent,1);
             }
+
             Glide.with(this).load(MapUtils.staticMapURL(location, 14, this)).centerCrop().into(iv_map);
         }else{
             bt_action_event.setText("Save");
@@ -186,7 +194,10 @@ public class CrearEvento extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 location = (LatLng) data.getParcelableExtra("location");
                 Glide.with(this).load(MapUtils.staticMapURL(location, 14, this)).centerCrop().into(iv_map);
+            }else if(toLocationPicker){
+                finish();
             }
+            if(toLocationPicker) toLocationPicker = false;
         }
     }
 }

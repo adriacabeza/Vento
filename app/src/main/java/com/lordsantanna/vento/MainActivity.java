@@ -131,14 +131,7 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
         mbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent1 = new Intent(MainActivity.this, CrearEvento.class);
-                if(myLocation != null)   intent1.putExtra("position", myLocation);
-
-                else {
-                    intent1.putExtra("position",new LatLng(41.40099, 2.19876));
-
-                }
-                startActivity(intent1);
+                newEvent(mapboxMap.getCameraPosition().target, true);
             }
         });
 
@@ -177,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
-                                        newEvent(point);
+                                        newEvent(point, false);
                                         dialog.dismiss();
                                     }
                                 });
@@ -315,9 +308,10 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
         }
     }
 
-    public void newEvent(LatLng latLng){
+    public void newEvent(LatLng latLng, boolean pickLocationFirst){
         Intent intent = new Intent(MainActivity.this, CrearEvento.class);
         intent.putExtra("location", latLng);
+        if (pickLocationFirst) intent.putExtra("pickLocationFirstZoom", mapboxMap.getCameraPosition().zoom);
         startActivity(intent);
     }
 
