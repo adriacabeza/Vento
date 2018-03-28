@@ -9,7 +9,7 @@
         android:layout_margin="8dp">
 
         <EditText
-            android:id="@+id/title"
+            android:id="@+id/et_title"
             android:hint="Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             android:layout_weight="0.5">
 
             <EditText
-                android:id="@+id/date"
+                android:id="@+id/et_date"
                 android:hint="@string/date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:layout_weight="0.5">
 
             <EditText
-                android:id="@+id/time"
+                android:id="@+id/et_time"
                 android:hint="@string/time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,21 +70,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll1"
-        android:layout_above="@+id/addevent"
+        android:layout_above="@+id/bt_action_event"
         android:layout_margin="8dp">
 
         <EditText
-            android:id="@+id/description"
+            android:id="@+id/et_description"
             android:hint="Description"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="textLongMessage"
+            android:inputType="textMultiLine"
             android:gravity="top"/>
     </android.support.design.widget.TextInputLayout>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/addevent"
+        android:id="@+id/bt_action_event"
         android:text="ADD"
         android:layout_alignParentBottom="true"
         style="@style/Widget.AppCompat.Button.Colored"/>

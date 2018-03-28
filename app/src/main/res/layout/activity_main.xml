@@ -44,10 +44,9 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="41"
         mapbox:mapbox_cameraTargetLng="2"
-        mapbox:mapbox_styleUrl="mapbox://styles/mapbox/dark-v9"
-        mapbox:mapbox_cameraZoom="11" >
-
-
+        mapbox:mapbox_styleUrl="mapbox://styles/carlosair/cjf9vwq4767ru2sr2hn595w41"
+        mapbox:mapbox_cameraZoom="11"
+        mapbox:mapbox_uiTiltGestures="false">
     </com.mapbox.mapboxsdk.maps.MapView>
 
     <android.support.design.widget.FloatingActionButton

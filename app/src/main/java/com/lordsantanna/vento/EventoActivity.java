@@ -6,7 +6,9 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.EventLog;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,74 +18,49 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.lordsantanna.vento.utils.MapUtils;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class EventoActivity extends AppCompatActivity {
-    private FirebaseUser FBuser;
+    TextView tv_name, tv_creator, tv_date, tv_time, tv_description, tv_participants;
+    ImageView iv_map;
+    Button bt_action;
     LatLng location;
-    String name, user;
-    int nparticiapants;
+    Calendar date;
+    String name, creator, user;
+    int nparticipants;
+    String key;
+    boolean user_is_creator = false;
+    DatabaseReference eventsRef;
+    private FirebaseUser FBuser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evento);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference eventsRef = database.getReference("event");
+        eventsRef = database.getReference("event");
         FBuser = FirebaseAuth.getInstance().getCurrentUser();
 
-        final TextView tv_name = findViewById(R.id.tv_title);
-        final TextView tv_user = findViewById(R.id.tv_user);
-        final TextView dates = findViewById(R.id.tv_date);
-        final TextView time = findViewById(R.id.tv_time);
-        final TextView description = findViewById(R.id.tv_description);
-        final Button button = findViewById(R.id.bt_action);
-        final TextView participantes = findViewById(R.id.numberofparticipants);
-        final ImageView iv_map = findViewById(R.id.iv_map);
+        tv_name = findViewById(R.id.tv_title);
+        tv_creator = findViewById(R.id.tv_creator);
+        tv_date = findViewById(R.id.tv_date);
+        tv_time = findViewById(R.id.tv_time);
+        tv_description = findViewById(R.id.tv_description);
+        bt_action = findViewById(R.id.bt_action);
+        tv_participants = findViewById(R.id.numberofparticipants);
+        iv_map = findViewById(R.id.iv_map);
 
-        final String key = getIntent().getStringExtra("key");
-        eventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                name = dataSnapshot.child(key).child("titol").getValue().toString();
-                tv_name.setText(name);
-                user = dataSnapshot.child(key).child("usuari").getValue().toString();
-                tv_user.setText(user);
-                description.setText(dataSnapshot.child(key).child("info").getValue().toString());
-                Calendar date = Calendar.getInstance();
-                date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
-                SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
-                String strDt = simpleDate.format(date.getTime());
-                dates.setText(strDt);
-                SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
-                String strTm = simpletime.format(date.getTime());
-                time.setText(strTm);
-                nparticiapants = (int) dataSnapshot.child(key).child("joined").getChildrenCount();
-                participantes.setText(String.valueOf(nparticiapants)+" joined");
-                location = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
-                Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(location, 14, EventoActivity.this)).centerCrop().into(iv_map);
-            }
+        key = getIntent().getStringExtra("key");
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        button.setOnClickListener(new View.OnClickListener() {
+        bt_action.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog alertDialog = new AlertDialog.Builder(EventoActivity.this).create();
@@ -92,9 +69,9 @@ public class EventoActivity extends AppCompatActivity {
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                String prova = FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(FBuser.getDisplayName().toString()).getKey();
+                                String prova = FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(user).getKey();
                                // if(prova == null) {
-                                    FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(FBuser.getDisplayName().toString()).setValue("1");
+                                    FirebaseDatabase.getInstance().getReference("event").child(key).child("joined").child(user).setValue("1");
 
                                     Toast.makeText(EventoActivity.this, "Congratulations! You've joined this event.", Toast.LENGTH_SHORT).show();
                                     finish();
@@ -113,8 +90,6 @@ public class EventoActivity extends AppCompatActivity {
                             }
                         });
                 alertDialog.show();
-
-
             }
         });
 
@@ -131,7 +106,69 @@ public class EventoActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_event, menu);
+
+        MenuItem item = menu.findItem(R.id.action_edit);
+        item.setVisible(user_is_creator);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_edit:
+                Intent intent = new Intent(EventoActivity.this, CrearEvento.class);
+                intent.putExtra("key", key);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        eventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                name = dataSnapshot.child(key).child("titol").getValue().toString();
+                tv_name.setText(name);
+                creator = dataSnapshot.child(key).child("usuari").getValue().toString();
+                tv_creator.setText(creator);
+                tv_description.setText(dataSnapshot.child(key).child("info").getValue().toString());
+                date = Calendar.getInstance();
+                date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
+                SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
+                String strDt = simpleDate.format(date.getTime());
+                tv_date.setText(strDt);
+                SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
+                String strTm = simpletime.format(date.getTime());
+                tv_time.setText(strTm);
+                nparticipants = (int) dataSnapshot.child(key).child("joined").getChildrenCount();
+                tv_participants.setText(String.valueOf(nparticipants)+" joined");
+                location = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
+                Glide.with(EventoActivity.this).load(MapUtils.staticMapURL(location, 14, EventoActivity.this)).centerCrop().into(iv_map);
+
+                user = FBuser.getDisplayName().toString();
+
+                user_is_creator = user.equals(creator);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }
 //TODO AUTH NOT REALLY WORKING

@@ -32,7 +32,7 @@
             style="@style/Base.TextAppearance.AppCompat.Title"/>
 
         <TextView
-            android:id="@+id/tv_user"
+            android:id="@+id/tv_creator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/numberofparticipants"

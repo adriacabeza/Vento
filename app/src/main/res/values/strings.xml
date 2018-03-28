@@ -4,4 +4,6 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="user_location_permission_not_granted" />
+    <string name="title_activity_map_pick">MapPickActivity</string>
+    <string name="action_edit">Edit Event</string>
 </resources>

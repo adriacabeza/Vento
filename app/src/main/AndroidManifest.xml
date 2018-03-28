@@ -15,14 +15,19 @@
         <activity android:name=".userwin" />
         <activity android:name=".CrearEvento" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/AppThemeTransparentAB">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EventoActivity"></activity>
+        <activity android:name=".EventoActivity" />
+        <activity
+            android:name=".MapPickActivity"
+            android:label="@string/title_activity_map_pick"
+            android:theme="@style/AppThemeTransparentAB"></activity>
     </application>
 
 </manifest>

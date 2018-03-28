@@ -12,9 +12,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -96,14 +100,12 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
     private LocationEngine locationEngine;
     LatLng myLocation;
     private FirebaseUser user;
-    ArrayList<String> markers;
+    BiMap<Long, String> markers;
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         Mapbox.getInstance(this, getResources().getString(R.string.mapbox_key));
         setContentView(R.layout.activity_main);
 
@@ -112,19 +114,18 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference eventsRef = database.getReference("event");
 
-        markers = new ArrayList<String>();
+        markers = HashBiMap.create();
+
         if (user == null) {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         }
-
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null) {
             final user usuari = new user(user.getDisplayName().toString(), user.getPhoneNumber() , user.getEmail().toString());
             FirebaseDatabase.getInstance().getReference("usuari").child(usuari.name).setValue(usuari);
         }
-
 
         FloatingActionButton mbutton = (FloatingActionButton) findViewById(R.id.eventadd);
         mbutton.setOnClickListener(new View.OnClickListener() {
@@ -147,15 +148,17 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 MainActivity.this.mapboxMap = mapboxMap;
-                mapboxMap.getUiSettings().setTiltGesturesEnabled(false);
+                Integer ab_height = getSupportActionBar().getHeight();
+                mapboxMap.getUiSettings().setCompassMargins(mapboxMap.getUiSettings().getCompassMarginLeft(),mapboxMap.getUiSettings().getCompassMarginTop() + ab_height,mapboxMap.getUiSettings().getCompassMarginRight(), mapboxMap.getUiSettings().getCompassMarginBottom());
+
                 enableLocationPlugin();
 
                 mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
                     @Override
                     public boolean onInfoWindowClick(@NonNull Marker marker) {
-                        //Toast.makeText(MainActivity.this, "Event Details: " + marker.getTitle(), Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(MainActivity.this, EventoActivity.class);
-                        intent.putExtra("key", markers.get((int)marker.getId()));
+                        String FBkey = markers.get(marker.getId());
+                        intent.putExtra("key", FBkey);
                         startActivity(intent);
                         // return false to close the info window
                         // return true to leave the info window open
@@ -192,24 +195,26 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
 
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        for(DataSnapshot child: dataSnapshot.getChildren()){
-                            Marker marker = mapboxMap.addMarker(new MarkerOptions()
-                                     //.position(new LatLng( ((Long) dataSnapshot.child("lat").getValue()).doubleValue(),  ((Long) dataSnapshot.child("lng").getValue()).doubleValue()))
-                                    .position(new LatLng((double) dataSnapshot.child("lat").getValue(),  (double) dataSnapshot.child("lng").getValue()))
-                                    .title(dataSnapshot.child("titol").getValue().toString())
-                                    .snippet((String) dataSnapshot.child("usuari").getValue()));
-                            markers.add((int) marker.getId(), dataSnapshot.getKey());
-                        }
+                        String FBkey = dataSnapshot.getKey();
+                        Marker marker = mapboxMap.addMarker(new MarkerOptions()
+                                .position(new LatLng((double) dataSnapshot.child("lat").getValue(), (double) dataSnapshot.child("lng").getValue()))
+                                .title(dataSnapshot.child("titol").getValue().toString())
+                                .snippet((String) dataSnapshot.child("usuari").getValue()));
+                        markers.put(marker.getId(), FBkey);
                     }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                        Marker m = (Marker) mapboxMap.getAnnotation(markers.inverse().get(dataSnapshot.getKey()));
+                        m.setPosition(new LatLng((double) dataSnapshot.child("lat").getValue(),  (double) dataSnapshot.child("lng").getValue()));
+                        m.setTitle(dataSnapshot.child("titol").getValue().toString());
+                        m.setSnippet((String) dataSnapshot.child("usuari").getValue());
                     }
 
                     @Override
                     public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                        Marker m = (Marker) mapboxMap.getAnnotation(markers.inverse().get(dataSnapshot.getKey()));
+                        m.remove();
                     }
 
                     @Override
@@ -234,8 +239,8 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
                 if(tabId == R.id.bbn_item1){}
                 else if(tabId == R.id.bbn_item2){}
                 else{
-                        Intent intent2 = new Intent(MainActivity.this,userwin.class);
-                       startActivity(intent2);
+                    Intent intent2 = new Intent(MainActivity.this,userwin.class);
+                    startActivity(intent2);
                 }
             }
         });
@@ -312,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements LocationEngineLis
 
     public void newEvent(LatLng latLng){
         Intent intent = new Intent(MainActivity.this, CrearEvento.class);
-        intent.putExtra("position", latLng);
+        intent.putExtra("location", latLng);
         startActivity(intent);
     }
 

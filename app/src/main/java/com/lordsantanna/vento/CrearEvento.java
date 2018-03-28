@@ -2,6 +2,7 @@ package com.lordsantanna.vento;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -15,7 +16,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.lordsantanna.vento.utils.DatePickerFragment;
 import com.lordsantanna.vento.utils.MapUtils;
 import com.lordsantanna.vento.utils.TimePickerFragment;
@@ -32,62 +38,114 @@ import static android.R.attr.data;
  */
 
 public class CrearEvento extends AppCompatActivity {
-    EditText titol, tv_date, time, description;
+    private FirebaseUser FBuser;
+    EditText et_title, et_date, et_time, et_description;
     ImageView iv_map;
-    Button addevent;
+    Button bt_action_event;
     Calendar date;
-    LatLng position;
+    LatLng location;
+    String key;
+    boolean isCreating;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_createevent);
         date = Calendar.getInstance();
-        titol = (EditText) findViewById(R.id.title);
-        tv_date = (EditText) findViewById(R.id.date);
-        time = (EditText) findViewById(R.id.time);
-        description = (EditText) findViewById(R.id.description);
-        addevent = (Button) findViewById(R.id.addevent);
+        et_title = (EditText) findViewById(R.id.et_title);
+        et_date = (EditText) findViewById(R.id.et_date);
+        et_time = (EditText) findViewById(R.id.et_time);
+        et_description = (EditText) findViewById(R.id.et_description);
+        bt_action_event = (Button) findViewById(R.id.bt_action_event);
         iv_map = (ImageView) findViewById(R.id.iv_map);
-        position = (LatLng) getIntent().getParcelableExtra("position");
-        //TODO: position null
-        tv_date.setOnClickListener(new View.OnClickListener() {
+
+        isCreating = !(getIntent().hasExtra("key"));
+        if(isCreating){
+            location = (LatLng) getIntent().getParcelableExtra("location");
+            if(location == null){ //TODO: position null
+                location.setLatitude(41.40099);
+                location.setLongitude( 2.19876);
+            }
+            Glide.with(this).load(MapUtils.staticMapURL(location, 14, this)).centerCrop().into(iv_map);
+        }else{
+            bt_action_event.setText("Save");
+
+            key = getIntent().getStringExtra("key");
+
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            final DatabaseReference eventsRef = database.getReference("event");
+            FBuser = FirebaseAuth.getInstance().getCurrentUser();
+
+            eventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    et_title.setText(dataSnapshot.child(key).child("titol").getValue().toString());
+                    et_description.setText(dataSnapshot.child(key).child("info").getValue().toString());
+                    date.setTimeInMillis((Long) dataSnapshot.child(key).child("data").getValue()*1000);
+                    SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
+                    String strDt = simpleDate.format(date.getTime());
+                    et_date.setText(strDt);
+                    SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
+                    String strTm = simpletime.format(date.getTime());
+                    et_time.setText(strTm);
+                    location = new LatLng((double) dataSnapshot.child(key).child("lat").getValue(), (double) dataSnapshot.child(key).child("lng").getValue());
+                    Glide.with(CrearEvento.this).load(MapUtils.staticMapURL(location, 14, CrearEvento.this)).centerCrop().into(iv_map);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        iv_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CrearEvento.this, MapPickActivity.class);
+                intent.putExtra("location", location);
+                intent.putExtra("title", et_title.getText().toString());
+                startActivityForResult(intent,1);
+
+            }
+        });
+
+        et_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showDatePickerDialog();
             }
         });
-        if(position == null){
-            position.setLatitude(41.40099);
-            position.setLongitude( 2.19876);
-        }
-//Todo usuaei que vn a un event
-        time.setOnClickListener(new View.OnClickListener() {
+        //Todo usuaei que vn a un event
+        et_time.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showTimePickerDialog();
             }
         });
 
-        addevent.setOnClickListener(new View.OnClickListener() {
+        bt_action_event.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(titol.getText().length()>0) {
-                    event evento = new event(titol.getText().toString(), FirebaseAuth.getInstance().getCurrentUser().getDisplayName().toString(), description.getText().toString(), date.getTimeInMillis() / 1000, position.getLatitude(), position.getLongitude());
+                if(et_title.getText().length()>0) {
+                    event evento = new event(et_title.getText().toString(), FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), et_description.getText().toString(), date.getTimeInMillis() / 1000, location.getLatitude(), location.getLongitude());
+                    if(isCreating){
+                        String clau = FirebaseDatabase.getInstance().getReference("event").push().getKey();
+                        FirebaseDatabase.getInstance().getReference("event").child(clau).setValue(evento);
+                    }else{
+                        FirebaseDatabase.getInstance().getReference("event").child(key).child("data").setValue(evento.data);
+                        FirebaseDatabase.getInstance().getReference("event").child(key).child("info").setValue(evento.info);
+                        FirebaseDatabase.getInstance().getReference("event").child(key).child("lat").setValue(evento.lat);
+                        FirebaseDatabase.getInstance().getReference("event").child(key).child("lng").setValue(evento.lng);
+                        FirebaseDatabase.getInstance().getReference("event").child(key).child("titol").setValue(evento.titol);
+                    }
                     //TODO: firebase ususari agafarlo
-                    String clau =   FirebaseDatabase.getInstance().getReference("event").push().getKey();
-                    FirebaseDatabase.getInstance().getReference("event").child(clau).setValue(evento);
                     //TODO: show toast si falla al penjarse
-
-
                     finish();
                 }else{
                     Toast.makeText(CrearEvento.this, "Title cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-        Glide.with(this).load(MapUtils.staticMapURL(position, 14, this)).centerCrop().into(iv_map);
-
     }
 
     private void showDatePickerDialog() {
@@ -99,12 +157,12 @@ public class CrearEvento extends AppCompatActivity {
                 date.set(Calendar.DAY_OF_MONTH, day);
                 SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
                 String strDt = simpleDate.format(date.getTime());
-                tv_date.setText(strDt);
+                et_date.setText(strDt);
 
-                if(TextUtils.isEmpty(time.getText().toString())) showTimePickerDialog();
+                if(TextUtils.isEmpty(et_time.getText().toString())) showTimePickerDialog();
 
             }
-        });
+        }, date);
         newFragment.show(CrearEvento.this.getSupportFragmentManager(), "datePicker");
     }
 
@@ -116,12 +174,19 @@ public class CrearEvento extends AppCompatActivity {
                 date.set(Calendar.MINUTE, m);
                 SimpleDateFormat simpletime =  new SimpleDateFormat("HH:mm");
                 String strTm = simpletime.format(date.getTime());
-                time.setText(strTm);
+                et_time.setText(strTm);
             }
 
-        });
+        }, date);
         newFragment.show(CrearEvento.this.getSupportFragmentManager(), "timePicker");
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                location = (LatLng) data.getParcelableExtra("location");
+                Glide.with(this).load(MapUtils.staticMapURL(location, 14, this)).centerCrop().into(iv_map);
+            }
+        }
+    }
 }
-
